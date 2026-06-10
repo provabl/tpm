@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
   - `internal/attestor` — runs the `nitrotpm` provider through the kernel, lowers to
     `.tpm/attestation.json` (`context.platform.tpm_*`), and writes the `attest:nitro-attested` IAM tag.
   - `cmd/tpm attest` — `--device` (live `/dev/tpmrm0`) or `--quote` + `--ak-pub` (offline), with
-    `--expected-pcr*`, `--role-arn`/`--region`.
+    `--expected-pcr*`, `--role-arn`/`--region`, and `--capture` to persist a fetched quote (+ AK
+    pubkey) for later offline appraisal.
 - **Trust model documented honestly**: AWS NitroTPM publishes no root CA, so verification anchors to
   the EK/AK **public key** (from `aws ec2 get-instance-tpm-ek-pub` / the device run), carried in the
   kernel `trust.Root.Material`. v1 proves "a TPM on this instance signed these PCRs with this nonce

@@ -15,9 +15,12 @@ package tpmquote
 import (
 	"context"
 	"crypto/x509"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/go-tpm-tools/client"
+	pb "github.com/google/go-tpm-tools/proto/tpm"
 	"github.com/google/go-tpm/legacy/tpm2"
 	"github.com/provabl/evidence/providers/nitrotpm"
 	"github.com/provabl/evidence/term"
@@ -66,4 +69,32 @@ func (s DeviceSource) Fetch(_ context.Context, _ term.Target, nonce []byte) (nit
 		return nitrotpm.TPMQuote{}, fmt.Errorf("TPM2_Quote: %w", err)
 	}
 	return fromPB(q, nonce)
+}
+
+// fromPB adapts a go-tpm-tools *pb.Quote (the output of client.Key.Quote) into the
+// kernel's nitrotpm.TPMQuote. nonce is echoed into the kernel field so the appraiser
+// can bind it; the signed attest blob (carrying the same nonce as qualifyingData)
+// travels in Raw for the Verifier.
+func fromPB(q *pb.Quote, nonce []byte) (nitrotpm.TPMQuote, error) {
+	if q == nil {
+		return nitrotpm.TPMQuote{}, fmt.Errorf("nil quote")
+	}
+	raw, err := json.Marshal(rawQuote{Attest: q.GetQuote(), Sig: q.GetRawSig()})
+	if err != nil {
+		return nitrotpm.TPMQuote{}, fmt.Errorf("marshal raw quote: %w", err)
+	}
+	return nitrotpm.TPMQuote{Nonce: nonce, PCRs: pcrsHex(q.GetPcrs()), Raw: raw}, nil
+}
+
+// pcrsHex renders the quoted PCR bank as index-string → lowercase hex, the shape
+// nitrotpm.TPMQuote.PCRs expects. A nil bank yields an empty map.
+func pcrsHex(p *pb.PCRs) map[string]string {
+	out := map[string]string{}
+	if p == nil {
+		return out
+	}
+	for idx, v := range p.GetPcrs() {
+		out[fmt.Sprintf("%d", idx)] = hex.EncodeToString(v)
+	}
+	return out
 }

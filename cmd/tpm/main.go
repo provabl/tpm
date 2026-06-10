@@ -14,6 +14,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -24,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/provabl/evidence/providers/nitrotpm"
+	"github.com/provabl/evidence/term"
 	"github.com/provabl/tpm/internal/attestor"
 	"github.com/provabl/tpm/internal/tpmquote"
 )
@@ -51,6 +53,7 @@ func attestCmd() *cobra.Command {
 	var (
 		quotePath    string
 		akPubPath    string
+		capturePath  string
 		useDevice    bool
 		roleARN      string
 		tpmDir       string
@@ -91,6 +94,11 @@ the trusted attestation-key public key with --ak-pub (DER PKIX).`,
 				// The device run emits the AK public key it quoted with; capture it
 				// as the trust material the verifier anchors to.
 				src = tpmquote.DeviceSource{AKPubOut: &akPubDER}
+				// --capture persists the fetched quote (and the AK pubkey) for later
+				// offline appraisal with --quote/--ak-pub.
+				if capturePath != "" {
+					src = &capturingSource{inner: src, quotePath: capturePath, akPubPath: capturePath + ".akpub", akPub: &akPubDER}
+				}
 			} else {
 				if akPubPath == "" {
 					return fmt.Errorf("--quote requires --ak-pub (the trusted attestation-key public key, DER PKIX)")
@@ -139,12 +147,43 @@ the trusted attestation-key public key with --ak-pub (DER PKIX).`,
 	cmd.Flags().StringVar(&quotePath, "quote", "", "path to a captured quote (JSON; requires --ak-pub)")
 	cmd.Flags().StringVar(&akPubPath, "ak-pub", "", "trusted attestation-key public key, DER PKIX (for --quote)")
 	cmd.Flags().BoolVar(&useDevice, "device", false, "read a fresh quote from /dev/tpmrm0 (NitroTPM instance; requires -tags tpm)")
+	cmd.Flags().StringVar(&capturePath, "capture", "", "with --device: also write the fetched quote (JSON) here and the AK pubkey to <path>.akpub")
 	cmd.Flags().StringVar(&roleARN, "role-arn", "", "IAM role ARN to tag attest:nitro-attested=true when attested")
 	cmd.Flags().StringVar(&tpmDir, "tpm-dir", ".tpm", "output directory for attestation.json")
 	cmd.Flags().StringVar(&region, "region", "us-east-1", "AWS region for IAM tagging")
 	cmd.Flags().StringVar(&expectedPCR0, "expected-pcr0", "", "require this PCR0 (UEFI firmware) hex value")
 	cmd.Flags().StringVar(&expectedPCR7, "expected-pcr7", "", "require this PCR7 (secure-boot policy) hex value")
 	return cmd
+}
+
+// capturingSource wraps a nitrotpm.Source and persists the fetched quote (as the
+// nitrotpm.TPMQuote JSON that FileSource reads) plus the AK public key, so a live
+// device run can produce a reusable offline fixture. It is a pass-through otherwise.
+type capturingSource struct {
+	inner     nitrotpm.Source
+	quotePath string
+	akPubPath string
+	akPub     *[]byte
+}
+
+func (c *capturingSource) Fetch(ctx context.Context, target term.Target, nonce []byte) (nitrotpm.TPMQuote, error) {
+	q, err := c.inner.Fetch(ctx, target, nonce)
+	if err != nil {
+		return q, err
+	}
+	b, err := json.Marshal(q)
+	if err != nil {
+		return q, fmt.Errorf("marshal captured quote: %w", err)
+	}
+	if err := os.WriteFile(c.quotePath, b, 0o600); err != nil {
+		return q, fmt.Errorf("write captured quote: %w", err)
+	}
+	if c.akPub != nil && len(*c.akPub) > 0 {
+		if err := os.WriteFile(c.akPubPath, *c.akPub, 0o600); err != nil {
+			return q, fmt.Errorf("write captured AK pubkey: %w", err)
+		}
+	}
+	return q, nil
 }
 
 // awsIAMTagger adapts the AWS IAM client to attestor.IAMTagger.
