@@ -29,3 +29,7 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 - Hardware-free fixture tests (software-AK quote: good verifies, tampered/wrong-key/empty-root fail)
   plus a kernel round-trip test through the real `nitrotpm` provider; a real captured-quote fixture
   from NitroTPM hardware validation.
+- **SLSA L3 release workflow** (provabl#5): `release.yml` from the start uses the
+  `slsa-framework/slsa-github-generator` reusable workflow (isolated, non-falsifiable builder) —
+  cosign keyless signatures, an attested SBOM, and L3 provenance over the combined artifact hashes.
+  The L3 proof is produced on the first tag.
