@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.24
 	github.com/aws/aws-sdk-go-v2/service/iam v1.54.4
+	github.com/aws/aws-sdk-go-v2/service/sts v1.43.3
 	github.com/google/go-tpm v0.9.8
 	github.com/google/go-tpm-tools v0.4.9
 	github.com/provabl/evidence v0.3.0
@@ -24,7 +25,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.1.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.31.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.36.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.43.3 // indirect
 	github.com/aws/smithy-go v1.27.1 // indirect
 	github.com/google/go-configfs-tsm v0.3.3-0.20240919001351-b4b5b84fdcbc // indirect
 	github.com/google/go-eventlog v0.0.3-0.20260416001248-6807b85eecf0 // indirect
