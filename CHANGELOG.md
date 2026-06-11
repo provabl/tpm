@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Added
 
+- **`tpm preflight`** (provabl#16): verifies the calling principal holds the IAM actions tpm needs
+  (`iam:TagRole` to write `attest:nitro-attested`, and `ec2:GetInstanceTpmEkPub` for the NitroTPM
+  trust anchor) via read-only `iam:SimulatePrincipalPolicy` against the caller ARN. Renders ✓/✗ per
+  action with remediation; exits non-zero on any deny; fail-closed on an un-callable check. New
+  `internal/preflight` (mock-driven tests). Mirrors attest/ground. See `docs/required-permissions.md`.
 - **Initial NitroTPM attestation producer** — the boot-chain counterpart to `nitro`, filling the
   deferred producer half of the evidence kernel's `nitrotpm` provider (evidence#6). Implements the
   kernel's injected `Source` and `Verifier`:

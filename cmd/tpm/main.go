@@ -27,6 +27,7 @@ import (
 	"github.com/provabl/evidence/providers/nitrotpm"
 	"github.com/provabl/evidence/term"
 	"github.com/provabl/tpm/internal/attestor"
+	"github.com/provabl/tpm/internal/preflight"
 	"github.com/provabl/tpm/internal/tpmquote"
 )
 
@@ -45,8 +46,49 @@ func rootCmd() *cobra.Command {
 		Short:   "AWS NitroTPM boot-chain attestation producer for the Provabl suite",
 		Version: version,
 	}
-	cmd.AddCommand(attestCmd())
+	cmd.AddCommand(attestCmd(), preflightCmd())
 	return cmd
+}
+
+// preflightCmd verifies the calling principal holds the IAM actions tpm needs.
+func preflightCmd() *cobra.Command {
+	var region string
+	cmd := &cobra.Command{
+		Use:   "preflight",
+		Short: "Verify the calling principal holds the IAM permissions tpm needs",
+		Long: `Check that the calling AWS principal can perform tpm's AWS-touching actions
+(iam:TagRole to write attest:nitro-attested, and ec2:GetInstanceTpmEkPub for the
+NitroTPM trust anchor) via read-only iam:SimulatePrincipalPolicy against the
+caller — it evaluates, it does not act. A denied action prints a remediation and
+the command exits non-zero. See docs/required-permissions.md.`,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			return runPreflight(preflight.CheckCallerPermissions(cmd.Context(), region))
+		},
+	}
+	cmd.Flags().StringVar(&region, "region", "us-east-1", "AWS region")
+	return cmd
+}
+
+// runPreflight renders preflight results and returns a non-nil error if any failed.
+func runPreflight(results []preflight.Result) error {
+	failures := 0
+	for _, r := range results {
+		if r.Status {
+			fmt.Printf("  ✓ %s\n", r.Name)
+			continue
+		}
+		failures++
+		fmt.Printf("  ✗ %s: %s\n", r.Name, r.Detail)
+		if r.Remediation != "" {
+			fmt.Printf("      Remediation: %s\n", r.Remediation)
+		}
+	}
+	fmt.Println()
+	if failures > 0 {
+		return fmt.Errorf("preflight failed: %d required permission(s) missing", failures)
+	}
+	fmt.Println("✓ All required permissions present")
+	return nil
 }
 
 func attestCmd() *cobra.Command {
