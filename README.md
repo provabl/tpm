@@ -55,6 +55,10 @@ the EK→AWS-API linkage is the trust root, and that boundary is stated honestly
 # On a NitroTPM instance: read a fresh quote from /dev/tpmrm0 (binary built with -tags tpm)
 tpm attest --device --expected-pcr7 9f8e7d…
 
+# Bind to the vetted image: auto-load the golden PCRs from this instance's source-AMI attest:pcr* tags
+# (the ones `vet ami-reference` recorded; reads IMDS + ec2:DescribeImages on the instance)
+tpm attest --device --expected-from-ami
+
 # Tag a principal's role when attested (gated by ground's SCP)
 tpm attest --device --role-arn arn:aws:iam::123456789012:role/Workload --region us-west-2
 

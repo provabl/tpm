@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Added
 
+- **`tpm attest --expected-from-ami`** (provabl#13): on the live instance, auto-loads the expected
+  PCRs from the source AMI's `attest:pcr<N>` golden tags (the ones `vet ami-reference` writes) instead
+  of the operator hand-copying hex into `--expected-pcrN`. Reads the source AMI id from IMDS
+  (`ami-id`) and the tags via `ec2:DescribeImages`, feeding them to the `expected_pcr<N>` appraiser
+  check — so an instance whose measured boot diverges from the vetted image's golden reference fails
+  attestation. Explicit `--expected-pcrN` flags override the AMI-derived values; a source AMI with no
+  `attest:pcr*` tags is an error (fail-closed, not an unenforced check). The golden tags are locked to
+  the vetter by ground's lockdown SCP, so an instance cannot rewrite its own reference. New
+  `internal/goldenpcr` (IMDS + DescribeImages behind interfaces; fake-driven tests). Closes the
+  runtime-binding loop's last manual seam.
 - **`tpm preflight`** (provabl#16): verifies the calling principal holds the IAM actions tpm needs
   (`iam:TagRole` to write `attest:nitro-attested`, and `ec2:GetInstanceTpmEkPub` for the NitroTPM
   trust anchor) via read-only `iam:SimulatePrincipalPolicy` against the caller ARN. Renders ✓/✗ per

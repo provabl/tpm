@@ -5,6 +5,8 @@ go 1.26.4
 require (
 	github.com/aws/aws-sdk-go-v2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.24
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.29
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/service/iam v1.54.4
 	github.com/aws/aws-sdk-go-v2/service/sts v1.43.3
 	github.com/google/go-tpm v0.9.8
@@ -16,7 +18,6 @@ require (
 require (
 	github.com/GoogleCloudPlatform/confidential-space/server v0.0.0-20260522213940-e5c6d01a3007 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.23 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.29 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.29 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.29 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.30 // indirect
@@ -33,6 +34,7 @@ require (
 	github.com/google/logger v1.1.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
