@@ -21,9 +21,13 @@ attests an isolated Nitro **Enclave** (the workload image), `tpm` attests the **
 ordinary EC2 instance** via a TPM 2.0 quote — "did this instance boot a known-good OS?". Both feed
 the same evidence kernel and the same `context.platform.*` Cedar inputs.
 
-```
-NitroTPM /dev/tpmrm0  ──►  tpm  ──►  .tpm/attestation.json   (read by attest → context.platform.tpm_*)
-                                └─►  attest:boot-attested tag (checked by ground's SCP)
+```mermaid
+flowchart LR
+    dev["NitroTPM<br/>/dev/tpmrm0 quote"] --> tpm["<b>tpm</b><br/>verify via evidence kernel"]
+    tpm --> json[".tpm/attestation.json"]
+    tpm --> tag["attest:boot-attested tag"]
+    json -->|"context.platform.tpm_*"| attest["<b>attest</b><br/>Cedar PDP"]
+    tag -->|"gated by"| scp["<b>ground</b> SCP"]
 ```
 
 `attest:boot-attested` is the boot-chain (measured-OS) attestation tag — distinct from `nitro`'s
