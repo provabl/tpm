@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Fixed
+
+- **Bump indirect `golang.org/x/crypto` v0.45.0 → v0.52.0** (suite-wide x/crypto sweep). Raises the
+  dependency-graph floor past the 8 HIGH SSH/knownhosts CVEs (CVE-2026-39827/39828/39829/39830/39835,
+  -42508, -46595/46597) — the same family fixed in attest. The vulnerable code is **not reachable**
+  from tpm (govulncheck: 0 affected), so this is defense-in-depth / tidiness, not a reachable fix; the
+  bump is stable under `go mod tidy`. Build + full test suite green.
+
 ### Changed
 
 - **tpm now writes `attest:boot-attested`** (was the conflated `attest:nitro-attested`), per
