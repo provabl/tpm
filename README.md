@@ -39,6 +39,15 @@ the appraiser binds the challenge nonce (the quote's qualifyingData) and applies
 tool supplies the real `Source` (a TPM2_Quote over the boot PCRs) and `Verifier` (the quote signature
 against the attestation key).
 
+## Core concepts
+
+(terms link to the suite [glossary](https://github.com/provabl/provabl/blob/main/docs/guide/glossary.md))
+
+- **[NitroTPM](https://github.com/provabl/provabl/blob/main/docs/guide/glossary.md#nitro--nitrotpm)** — a virtual [TPM](https://github.com/provabl/provabl/blob/main/docs/guide/glossary.md#pcr-platform-configuration-register) AWS exposes to an ordinary EC2 instance, so it can attest its boot chain without an enclave.
+- **[PCR](https://github.com/provabl/provabl/blob/main/docs/guide/glossary.md#pcr-platform-configuration-register) quote** — a TPM2_Quote signs the boot-measurement registers; the appraiser checks them against expected/[golden](https://github.com/provabl/provabl/blob/main/docs/guide/glossary.md#golden-pcr) values to prove a known-good OS booted.
+- **EK/AK public-key trust anchor** — AWS publishes no NitroTPM root CA, so trust anchors to the endorsement/attestation-key public key you fetch from the EC2 control plane (see Trust model).
+- **[Lowered attribute](https://github.com/provabl/provabl/blob/main/docs/guide/glossary.md#lowered-attribute)** — tpm's verdict becomes `.tpm/attestation.json` (→ `context.platform.tpm_*`) + the `attest:boot-attested` tag — distinct from nitro's `attest:enclave-attested`.
+
 ## Trust model — read this
 
 NitroTPM is **not** like Nitro Enclaves, and the difference matters:
