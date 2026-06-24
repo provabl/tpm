@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Added
 
+
+- **Added a `Security Scan` workflow** (`.github/workflows/security.yml`): govulncheck + Trivy filesystem (dependency) + Trivy IaC scans on every push/PR and weekly, blocking on HIGH/CRITICAL. Trivy pinned to `v0.36.0`. Brings this repo in line with the rest of the suite — every Provabl tool now self-scans, fitting a security/compliance suite. The standalone govulncheck job moved out of `ci.yaml` into this workflow (no longer duplicated).
 - **`tpm attest --expected-from-ami`** (provabl#13): on the live instance, auto-loads the expected
   PCRs from the source AMI's `attest:pcr<N>` golden tags (the ones `vet ami-reference` writes) instead
   of the operator hand-copying hex into `--expected-pcrN`. Reads the source AMI id from IMDS
