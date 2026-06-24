@@ -4,8 +4,9 @@
 // Package attestor runs the provabl/evidence nitrotpm provider against a TPM quote
 // source and turns the verdict into the suite's durable outputs: a
 // .tpm/attestation.json file (read by attest as context.platform.*) and an
-// attest:nitro-attested IAM principal tag (checked by ground's SCP — the same tag
-// the enclave producer writes, since both answer "the runtime is attested").
+// attest:boot-attested IAM principal tag (checked by ground's SCP — distinct from
+// the enclave producer's attest:enclave-attested, since the two prove different
+// properties at different trust strengths).
 package attestor
 
 import (
@@ -23,11 +24,14 @@ import (
 	"github.com/provabl/evidence/term"
 )
 
-// TagNitroAttested is the IAM principal tag ground's SCP checks. The TPM producer
-// writes the same tag as the enclave producer: both assert "this runtime is
-// attested", and ground's SCP gates data access on it regardless of which
-// platform-attestation path proved it.
-const TagNitroAttested = "attest:nitro-attested"
+// TagBootAttested is the IAM principal tag ground's SCP checks for BOOT-chain
+// attestation: it asserts the principal BOOTED a measured, known-good OS (proven
+// via a NitroTPM TPM 2.0 quote over the boot PCRs). It is deliberately distinct
+// from nitro's attest:enclave-attested (running inside a verified Nitro Enclave) —
+// a tag names what was proven, not which tool proved it, and the two are different
+// trust strengths (no conflation). See provabl ADR 0003 and the canonical attest:*
+// registry (attest-tags-schema.json, writer "tpm").
+const TagBootAttested = "attest:boot-attested"
 
 // PlatformResult is the .tpm/attestation.json artifact. Its json tags match
 // attest's context.platform.* contract (a JSON shape, not a shared Go type, so the
@@ -78,7 +82,7 @@ type Result struct {
 
 // Attest runs the nitrotpm provider through the evidence kernel, lowers the
 // verdict, writes .tpm/attestation.json, and — when attested and a roleARN is
-// given — writes the attest:nitro-attested tag to that role.
+// given — writes the attest:boot-attested tag to that role.
 func (a *Attestor) Attest(ctx context.Context, roleARN string, expectedPCRs map[string]string) (*Result, error) {
 	reg := asp.NewRegistry()
 	if err := reg.Register(nitrotpm.Provider(a.src, a.ver)); err != nil {
@@ -126,7 +130,7 @@ func (a *Attestor) Attest(ctx context.Context, roleARN string, expectedPCRs map[
 		if roleName == "" {
 			return nil, fmt.Errorf("could not extract role name from ARN: %s", roleARN)
 		}
-		if err := a.tagger.TagRole(ctx, roleName, map[string]string{TagNitroAttested: "true"}); err != nil {
+		if err := a.tagger.TagRole(ctx, roleName, map[string]string{TagBootAttested: "true"}); err != nil {
 			return nil, fmt.Errorf("tag role %s: %w", roleName, err)
 		}
 		res.TaggedRole = roleName

@@ -23,8 +23,12 @@ the same evidence kernel and the same `context.platform.*` Cedar inputs.
 
 ```
 NitroTPM /dev/tpmrm0  ──►  tpm  ──►  .tpm/attestation.json   (read by attest → context.platform.tpm_*)
-                                └─►  attest:nitro-attested tag (checked by ground's SCP)
+                                └─►  attest:boot-attested tag (checked by ground's SCP)
 ```
+
+`attest:boot-attested` is the boot-chain (measured-OS) attestation tag — distinct from `nitro`'s
+`attest:enclave-attested` (enclave integrity). They prove different properties at different trust
+strengths and are deliberately not conflated (provabl ADR 0003).
 
 It runs the [`provabl/evidence`](https://github.com/provabl/evidence) `nitrotpm` provider in-process:
 the appraiser binds the challenge nonce (the quote's qualifyingData) and applies the PCR policy; this

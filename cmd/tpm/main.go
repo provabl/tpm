@@ -3,7 +3,7 @@
 
 // Command tpm produces an AWS NitroTPM boot-chain attestation and writes the
 // suite's durable outputs: .tpm/attestation.json (read by attest as
-// context.platform.*) and, optionally, the attest:nitro-attested IAM tag (checked
+// context.platform.*) and, optionally, the attest:boot-attested IAM tag (checked
 // by ground's SCP).
 //
 // Trust model: NitroTPM publishes no root CA. Verification anchors to the
@@ -60,7 +60,7 @@ func preflightCmd() *cobra.Command {
 		Use:   "preflight",
 		Short: "Verify the calling principal holds the IAM permissions tpm needs",
 		Long: `Check that the calling AWS principal can perform tpm's AWS-touching actions
-(iam:TagRole to write attest:nitro-attested, and ec2:GetInstanceTpmEkPub for the
+(iam:TagRole to write attest:boot-attested, and ec2:GetInstanceTpmEkPub for the
 NitroTPM trust anchor) via read-only iam:SimulatePrincipalPolicy against the
 caller — it evaluates, it does not act. A denied action prints a remediation and
 the command exits non-zero. See docs/required-permissions.md.`,
@@ -112,7 +112,7 @@ func attestCmd() *cobra.Command {
 		Short: "Produce a NitroTPM attestation and write .tpm/attestation.json",
 		Long: `Produce an AWS NitroTPM boot-chain attestation, writing the lowered result
 to .tpm/attestation.json for attest's context.platform.* and, when --role-arn is
-given and the quote is attested, the attest:nitro-attested IAM tag ground's SCP checks.
+given and the quote is attested, the attest:boot-attested IAM tag ground's SCP checks.
 
 On a NitroTPM instance, use --device to read a fresh quote from /dev/tpmrm0 (requires
 a binary built with -tags tpm). Off-instance, supply a captured quote with --quote and
@@ -194,7 +194,7 @@ the trusted attestation-key public key with --ak-pub (DER PKIX).`,
 			}
 			fmt.Printf("\n✓ Written to %s\n", res.WrotePath)
 			if res.TaggedRole != "" {
-				fmt.Printf("✓ Tagged role %s: %s=true\n", res.TaggedRole, attestor.TagNitroAttested)
+				fmt.Printf("✓ Tagged role %s: %s=true\n", res.TaggedRole, attestor.TagBootAttested)
 			}
 			if !p.TPMAttested {
 				fmt.Printf("\n✗ Not attested: %s\n", res.Reason)
@@ -207,7 +207,7 @@ the trusted attestation-key public key with --ak-pub (DER PKIX).`,
 	cmd.Flags().StringVar(&akPubPath, "ak-pub", "", "trusted attestation-key public key, DER PKIX (for --quote)")
 	cmd.Flags().BoolVar(&useDevice, "device", false, "read a fresh quote from /dev/tpmrm0 (NitroTPM instance; requires -tags tpm)")
 	cmd.Flags().StringVar(&capturePath, "capture", "", "with --device: also write the fetched quote (JSON) here and the AK pubkey to <path>.akpub")
-	cmd.Flags().StringVar(&roleARN, "role-arn", "", "IAM role ARN to tag attest:nitro-attested=true when attested")
+	cmd.Flags().StringVar(&roleARN, "role-arn", "", "IAM role ARN to tag attest:boot-attested=true when attested")
 	cmd.Flags().StringVar(&tpmDir, "tpm-dir", ".tpm", "output directory for attestation.json")
 	cmd.Flags().StringVar(&region, "region", "us-east-1", "AWS region for IAM tagging")
 	cmd.Flags().StringVar(&expectedPCR0, "expected-pcr0", "", "require this PCR0 (UEFI firmware) hex value")

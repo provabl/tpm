@@ -44,7 +44,7 @@ type iamSimAPI interface {
 
 // tpmRequiredActions are the AWS IAM actions tpm needs. tpm reads a NitroTPM quote
 // on-instance (no AWS API for the quote); its AWS-touching operations are tagging
-// the attested principal's role with attest:nitro-attested (iam:TagRole, via
+// the attested principal's role with attest:boot-attested (iam:TagRole, via
 // `tpm attest --role-arn`) and retrieving the instance EK public key — the NitroTPM
 // trust anchor — via ec2:GetInstanceTpmEkPub. iam:SimulatePrincipalPolicy is
 // included because this preflight itself needs it. See docs/required-permissions.md.
