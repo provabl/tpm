@@ -57,6 +57,20 @@ EK/AK public key you obtained from AWS.
 via `TPM2_ActivateCredential` — proving the AK lives in the same TPM AWS vouches for. Until then,
 the EK→AWS-API linkage is the trust root, and that boundary is stated honestly rather than hidden.
 
+## Install
+
+```bash
+go install github.com/provabl/tpm/cmd/tpm@latest   # requires Go 1.26.4+
+# or, from a clone:
+make build                                          # → bin/tpm
+make build-tpm                                      # compile the NitroTPM-only /dev/tpmrm0 source (-tags tpm)
+```
+
+**Prerequisites.** Go 1.26.4+. The `--quote` offline path needs no AWS access; tagging a role
+(`--role-arn`) needs `iam:TagRole` and the NitroTPM trust anchor needs `ec2:GetInstanceTpmEkPub` (run
+`tpm preflight` to check). The live `--device` read runs **only on a NitroTPM instance** and requires
+the `tpm`-tagged binary (`make build-tpm`).
+
 ## Usage
 
 ```bash
