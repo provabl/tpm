@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Changed
+
+- **tpm now writes `attest:boot-attested`** (was the conflated `attest:nitro-attested`), per
+  provabl ADR 0003 / provabl#30 (tpm#4). The boot producer and the enclave producer (`nitro`)
+  previously wrote the same `attest:nitro-attested` tag, but they prove different properties at
+  different trust strengths — tpm proves a measured, known-good OS boot (NitroTPM PCRs), nitro
+  proves a verified Nitro Enclave. The conflated tag is split per property: `nitro` now writes
+  `attest:enclave-attested`, tpm writes `attest:boot-attested`. A tag names what was proven, not
+  which tool proved it. A writer-scoped conformance test (`schema_conformance_test.go`, embedding
+  the canonical `attest-tags-schema.json` v3) locks tpm's constant to the registry's `writer:"tpm"`
+  row and fails if the pre-split tag reappears.
+
 ### Added
 
 - **`tpm attest --expected-from-ami`** (provabl#13): on the live instance, auto-loads the expected
