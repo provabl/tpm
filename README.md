@@ -66,6 +66,14 @@ EK/AK public key you obtained from AWS.
 via `TPM2_ActivateCredential` — proving the AK lives in the same TPM AWS vouches for. Until then,
 the EK→AWS-API linkage is the trust root, and that boundary is stated honestly rather than hidden.
 
+**Where the golden PCRs come from.** NitroTPM boot-measurement PCRs **cannot be computed offline from
+an AMI** — they are *captured from a trusted reference boot*: launch the AMI on a trusted instance,
+boot it, read the measured PCRs from `.tpm/attestation.json`, and let `vet ami-reference` record them
+as the source AMI's locked `attest:pcr*` tags (the ones `--expected-from-ami` loads). So the golden
+values are ground-truth from a vetter run, not derived algorithmically from the AMI's contents, and
+the binding is only as good as (a) the reference boot being genuinely known-good and (b) the tags
+being locked to the vetter principal by ground's lockdown SCP.
+
 ## Install
 
 ```bash

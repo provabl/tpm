@@ -21,6 +21,13 @@ paths are the ones below.
 `iam:TagRole` is exercised only when you pass `--role-arn`; without it, `tpm` still
 verifies the quote and writes `.tpm/attestation.json` locally, but tags nothing.
 
+> **Note — `--expected-from-ami` reads, but isn't checked here.** When `tpm attest`
+> runs on a live instance with `--expected-from-ami`, it loads the golden PCR0/PCR7
+> values from the source AMI's `attest:pcr*` tags via IMDS + `ec2:DescribeImages`. That
+> is an instance-role, read-only convenience path (the same tags `vet ami-reference`
+> records), not part of `tpm`'s permission contract, so preflight does not simulate it.
+> If you use the flag, grant the instance role `ec2:DescribeImages`.
+
 ## Why preflight checks every action
 
 The check is read-only, and simulating an action the current invocation will not use
