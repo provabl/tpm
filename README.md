@@ -10,7 +10,7 @@ Part of the [Provabl](https://provabl.dev) suite:
 - **[nitro](https://github.com/provabl/nitro)** — attest the runtime: AWS Nitro **Enclave** integrity
 - **tpm** — attest the runtime: AWS **NitroTPM** boot-chain integrity ← you are here
 
-> Ground your infrastructure, attest your controls, qualify your people, vet your software.
+> Ground your infrastructure, attest your controls, qualify your people, vet your software, steward your data.
 
 ---
 
