@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ### Fixed
 
+- **Bump Go 1.26.4 → 1.26.5** to clear **GO-2026-5856** (a `crypto/tls` standard-library vulnerability, fixed in go1.26.5). govulncheck flagged it as symbol-reachable via tpm's TLS calls (AWS EC2/IAM SDK, HTTPS). Toolchain bump only — no code changes.
 - **Bump indirect `golang.org/x/crypto` v0.45.0 → v0.52.0** (suite-wide x/crypto sweep). Raises the
   dependency-graph floor past the 8 HIGH SSH/knownhosts CVEs (CVE-2026-39827/39828/39829/39830/39835,
   -42508, -46595/46597) — the same family fixed in attest. The vulnerable code is **not reachable**
