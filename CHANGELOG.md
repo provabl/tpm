@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
   **GO-2026-6090**, **GO-2026-6088**, **GO-2026-5972**, **GO-2026-5026** — `net/url`, `crypto/tls`,
   `encoding/xml`, `encoding/asn1`, and `x/net/idna` via `net/http`), all fixed in go1.26.6.
   Toolchain bump only — no code changes.
+- **Bump `golang.org/x/crypto` 0.52.0 → 0.55.0** to clear **CVE-2026-56854** (CRITICAL) in
+  `golang.org/x/crypto/ssh`, flagged by the Trivy filesystem scan. Indirect dependency; no
+  code changes.
 
 ### Fixed
 
