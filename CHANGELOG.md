@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+### Security
+
+- **Bump Go 1.26.5 → 1.26.6** to clear five Go standard-library advisories (**GO-2026-6218**,
+  **GO-2026-6090**, **GO-2026-6088**, **GO-2026-5972**, **GO-2026-5026** — `net/url`, `crypto/tls`,
+  `encoding/xml`, `encoding/asn1`, and `x/net/idna` via `net/http`), all fixed in go1.26.6.
+  Toolchain bump only — no code changes.
+- **Bump `golang.org/x/crypto` 0.52.0 → 0.55.0** to clear **CVE-2026-56854** (CRITICAL) in
+  `golang.org/x/crypto/ssh`, flagged by the Trivy filesystem scan. Indirect dependency; no
+  code changes.
+
 ### Fixed
 
 - **Bump Go 1.26.4 → 1.26.5** to clear **GO-2026-5856** (a `crypto/tls` standard-library vulnerability, fixed in go1.26.5). govulncheck flagged it as symbol-reachable via tpm's TLS calls (AWS EC2/IAM SDK, HTTPS). Toolchain bump only — no code changes.
